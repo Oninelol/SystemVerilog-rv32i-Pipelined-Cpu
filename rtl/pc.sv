@@ -7,7 +7,7 @@ module program_counter{
 }
 
     always @(posedge clk) begin
-        addr = addr + 4;
+        addr <= addr + 4;
     end
 
 endmodule
