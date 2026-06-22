@@ -21,8 +21,10 @@ module control_unit{
     end
 
     always_comb begin // logic for reg_write
-        if(instr[6:0] == )
-
+        reg_write = 0;
+        if(instr[6:0] == ALU_R || instr[6:0] == ALU_I || instr[6:0] == STORE || instr[6:0] == JAL || instr[6:0] == JAL_R || instr[6:0] == LUI || instr[6:0] == AUIPC) begin
+            reg_write = 1;
+        end
     end
 
     always_comb begin // logic for data memory control signals 
