@@ -32,6 +32,5 @@ package pkg
         SUB_SRA_F7 = 7'b0000010;
 
     } funct7; // constructed enum based off different funct7 of rv32i instructions, with the multiplication extension
- 
 
 endpackage 
