@@ -1,46 +1,53 @@
 import pkg::*;
 
-module control_unit{
-    input [31:0] instr;
-    output logic reg_write;
-    output [1:0] alu_sel;
-    output logic mem_read;
-    output logic mem_write;
-    output logic branch_enable;
-}
+module control_unit(
+    input logic [31:0] instr,
+    output logic reg_write,
+    output logic [1:0] alu_type,
+    output logic mem_read,
+    output logic mem_write,
+    output logic branch_enable
+    output logic alu_src; // to be implemented
+    output logic mem_to_reg; // to be implemented
+    output logic jump; // to be implemented
+);
 
-    always_comb begin // logic for ALU control signals, determining operation type
-        case(instr[6:0])
-            ALU_R: alu_sel = 2'b00;
-            ALU_I: alu_sel = 2'b01;
-            JAL_R: alu_sel = 2'b01; // case JALR also uses the ALU, as I type.
-            (STORE || LOAD): alu_sel = 2'b10;
-            BRANCH: alu_sel = 2'b11;
-            default: alu_sel = 2'b11; // assign ALU control code to 2'b11 as default, so the default is ADD just like in branch.
-        endcase // default as 2'b11 is high, convinient for debugging purposes
-    end
+    always_comb begin // includes logic for ALU control, reg_write, data_memory, and branch signals
 
-    always_comb begin // logic for reg_write
         reg_write = 0;
-        if(instr[6:0] == ALU_R || instr[6:0] == ALU_I || instr[6:0] == LOAD || instr[6:0] == JAL || instr[6:0] == JAL_R || instr[6:0] == LUI || instr[6:0] == AUIPC) begin
-            reg_write = 1;
-        end
-    end
-
-    always_comb begin // logic for data memory control signals 
         mem_read = 0;
         mem_write = 0;
-        case(instr[6:0])
-            STORE: mem_write = 1;
-            LOAD: mem_read = 1;
-        endcase
-    end
+        branch_enable = 0;
+        alu_type = 2'b11; // defaulted signal values
 
-    always_comb begin   // logic for branch signal
-        if(intr[6:0] == BRANCH)
+        case(instr[6:0]) 
+        ALU_R: begin
+            reg_write = 1;
+            alu_type = 2'b00;
+        end
+        ALU_I: begin
+            reg_write = 1;
+            alu_type = 2'b01;
+        end
+        BRANCH: begin
             branch_enable = 1;
-        else
-            branch_enable = 0;
+            alu_type = 2'b10;
+        end
+        STORE: begin
+            mem_write = 1;
+            alu_type = 2'b11;
+        end
+        LOAD: begin
+            mem_read = 1;
+            reg_write = 1;
+            alu_type = 2'b11;
+        end
+        JAL: reg_write = 1;
+        JALR: reg_write = 1;
+        LUI: reg_write = 1;
+        AUIPC: reg_write = 1;
+
+        endcase
     end
 
 endmodule
