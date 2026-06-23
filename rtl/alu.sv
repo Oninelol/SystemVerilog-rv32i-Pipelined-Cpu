@@ -1,7 +1,7 @@
 import pkg::*;
 
 module ALU{
-    input [1:0] alu_sel;
+    input [4:0] alu_op;
     input [31:0] operand_1;
     input [31:0] operand_2;
     output logic zero;
@@ -9,6 +9,9 @@ module ALU{
     output [31:0] alu_result;
 }
 
+    always_comb begin
+        
+    end
 
 
 endmodule
