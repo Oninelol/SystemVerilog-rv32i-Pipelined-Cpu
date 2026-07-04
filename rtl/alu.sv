@@ -8,6 +8,9 @@ module ALU(
     output logic negative,
     output [31:0] alu_result,
 )
+    logic signed [63:0] temp_alu_mulh; 
+    logic signed [63:0] temp_alu_mulsu;
+    logic [63:0] temp_alu_mulu; // create logic vector variables to take temporary calculations that required higher bits to be copied
 
     always_comb begin // case statement inside to derive alu operation based on alu operation decided in alu_control block
         case(alu_op)
@@ -22,14 +25,23 @@ module ALU(
             ALU_SLT: alu_result = ($signed(operand_1) < $signed(operand_2)) ? 32'd1 : 32'd0;
             ALU_SLTU: alu_result = (operand_1 < operand_2) ? 32'd1 : 32'd0;
             ALU_MUL: alu_result = operand_1 * operand_2;
-            ALU_MULH: alu_result = ($signed(operand_1) * $signed(operand_2))[63:32]; // fix here later, as the result cannot be directly sliced, use temp to store result first 
-            ALU_MULSU: alu_result = ($signed(operand_1) * operand_2)[63:32];
-            ALU_MULU: alu_result = (operand_1 * operand_2)[63:32];
-            ALU_DIV: alu_result = ($signed(operand_1) / $signed(operand_2));
+            ALU_MULH: begin
+                temp_alu_mulh = $signed({{32{operand_1[31]}},operand_1}) * $signed({{32{operand_2[31]}},operand_2});
+                alu_result = temp_alu_mulh[63:32];
+            end
+            ALU_MULSU: begin
+                temp_alu_mulsu = $signed({{32{operand_1[31]}},operand_1}) * {32b'0,operand_2};
+                alu_result = temp_alu_mulsu[63:32];
+            end 
+            ALU_MULU: begin 
+                temp_alu_mulu = {32'b0,operand_1} * {32'b0,operand_2};
+                alu_result = temp_alu_mulu[63:32];
+            end
+            ALU_DIV: alu_result = ($signed(operand_1) / $signed(operand_2)); // add checks for DIV operation if operand_2 is 0 later (fix)
             ALU_DIVU: alu_result = operand_1 / operand_2;
             ALU_REM: alu_result = ($signed(operand_1) % $signed(operand_2));
             ALU_REMU: alu_result = operand_1 % operand_2;
-            default: alu_result = operand_1 + operand_2;
+            default: alu_result = 32'd0;
         endcase
     end
 
