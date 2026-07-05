@@ -12,10 +12,23 @@ module register_file{
     input [31:0] write_data;
 }
 
-    [31:0] regs [31:0]; // 32 Registers that are each 32 bit wide in regfile
+    logic [31:0] regs [31:0]; // 32 Registers that are each 32 bit wide in regfile
 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk) begin // clocked regfile
+        if(rst) begin
+            integer i;
+            for(i=0;i<32;i=i+1) begin
+                regs[i] <= 32'd0;
+            end
+        end
+        else if(reg_write) begin
+            regs[rd] <= write_data; // write data into desired register
+        end
+    end
 
+    always_comb begin   // combinational read
+        read_data1 <= regs[rs1];
+        read_data2 <= regs[rs2];
     end
 
 endmodule
