@@ -7,8 +7,8 @@ module control_unit(
     output logic mem_read,
     output logic mem_write,
     output logic branch_enable
-    output logic alu_src; // to be implemented
-    output logic mem_to_reg; // to be implemented
+    output logic alu_src;
+    output logic mem_to_reg; 
     output logic jump; // to be implemented
 );
 
@@ -18,6 +18,8 @@ module control_unit(
         mem_read = 0;
         mem_write = 0;
         branch_enable = 0;
+        mem_to_reg = 0;
+        alu_imm = 0; 
         alu_type = 2'b11; // defaulted signal values
 
         case(instr[6:0]) 
@@ -28,6 +30,7 @@ module control_unit(
         ALU_I: begin
             reg_write = 1;
             alu_type = 2'b01;
+            alu_imm = 1;
         end
         BRANCH: begin
             branch_enable = 1;
@@ -36,15 +39,21 @@ module control_unit(
         STORE: begin
             mem_write = 1;
             alu_type = 2'b11;
+            alu_imm = 1;
         end
         LOAD: begin
             mem_read = 1;
             reg_write = 1;
             alu_type = 2'b11;
+            mem_to_reg = 1;
+            alu_imm = 1;
         end
         JAL: reg_write = 1;
         JALR: reg_write = 1;
-        LUI: reg_write = 1;
+        LUI: begin
+            reg_write = 1;
+            alu_imm = 1;
+        end 
         AUIPC: reg_write = 1;
 
         endcase
