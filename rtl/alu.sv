@@ -7,7 +7,8 @@ module ALU(
     output logic zero,
     output logic negative,
     output [31:0] alu_result,
-)
+);
+
     logic signed [63:0] temp_alu_mulh; 
     logic signed [63:0] temp_alu_mulsu;
     logic [63:0] temp_alu_mulu; // create logic vector variables to take temporary calculations that required higher bits to be copied
