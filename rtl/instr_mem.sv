@@ -1,9 +1,9 @@
 import pkg::*;
 
-module instruction_memory{
-    input [31:0] addr;
-    output [31:0] instr;
-}
+module instruction_memory(
+    input [31:0] addr,
+    output [31:0] instr
+);
 
     logic [31:0] mem[1023:0]; // 4KB insruction memory 
     initial $readmemh("test_program.hex",mem); // load the hex program (assembly) into instruction memory
