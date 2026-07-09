@@ -13,7 +13,7 @@ module top(
     wire [31:0] imm_result;
     wire [4:0] alu_op;
     wire [31:0] ALU_result;
-    wire [31:0] mem_read_data;
+    wire [31:0] mem_read_data; 
 
 
     // below are control signals from the control unit and ALU (for branching)
