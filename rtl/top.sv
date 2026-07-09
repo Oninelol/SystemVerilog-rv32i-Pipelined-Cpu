@@ -6,8 +6,8 @@ module top(
 );
 
     // wires below connects modules 
-    wire [31:0] pc_in,read_addr_wire; 
     wire [31:0] instr;
+    wire [31:0] pc_in,read_addr_wire; 
     wire [31:0] read_data_1,read_data_2;
     wire [31:0] write_data;
     wire [31:0] imm_result;
