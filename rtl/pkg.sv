@@ -4,10 +4,10 @@ package pkg
         ALU_R = 7'b0110011;
         ALU_I = 7'b0010011;
         LOAD =  7'b0000011;
-        STORE = 7'b1100011;
+        STORE = 7'b0100011;
         BRANCH = 7'b1100011;
         JAL = 7'b1101111;
-        JAL_R = 7'b1100111;
+        JALR = 7'b1100111;
         LUI = 7'b0110111;
         AUIPC = 7'b0010111;
         ENV = 7'b1110011;
@@ -52,7 +52,7 @@ package pkg
         ALU_DIVU = 5'b01111;
         ALU_REM = 5'b10000;
         ALU_REMU = 5'b10001;
-        
+
     } alu_op_logic;
 
 endpackage 

@@ -4,7 +4,7 @@ module program_counter(
     input [31:0] pc_in,
     input logic clk,
     input logic rst,
-    output [31:0] pc_out
+    output logic [31:0] pc_out
 );
 
     always_ff @(posedge clk) begin 
