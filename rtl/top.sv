@@ -43,7 +43,8 @@ module top(
         .mem_write (MemWrite),
         .branch_enable (BranchEnable),
         .alu_src (ALUSrc),
-        .mem_to_reg (MemtoReg)
+        .mem_to_reg (MemtoReg),
+        .jump (jump)
     ); // Control unit connections
 
     register_file cpu_regfile (
