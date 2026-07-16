@@ -29,6 +29,7 @@ module top(
         .rst (rst),
         .pc_out (read_addr_wire)
     );  // PC connections
+    
 
     instruction_memory cpu_imem (
         .addr (read_addr_wire),
