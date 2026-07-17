@@ -21,6 +21,7 @@ module top(
     logic [1:0] ALUOp;
     logic MemRead,MemWrite,BranchEnable,ALUSrc,MemtoReg;
     logic zero,negative;
+    logic jump;
 
     // below connects the modules
     program_counter cpu_pc (
@@ -29,7 +30,21 @@ module top(
         .rst (rst),
         .pc_out (read_addr_wire)
     );  // PC connections
-    
+
+
+    // pc logic below
+
+    logic branch_taken;
+    wire [31:0] pc_plus_4, pc_target;
+
+    assign pc_plus_4 = read_addr_wire + 4; // default pc incrementation logic
+
+    always_comb begin
+        case(instr[14:12])
+            3'b00: 
+        endcase
+    end
+
 
     instruction_memory cpu_imem (
         .addr (read_addr_wire),
