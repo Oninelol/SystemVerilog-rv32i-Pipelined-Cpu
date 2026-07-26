@@ -1,4 +1,4 @@
-package pkg
+package pkg;
 
     typedef enum logic [6:0]{
         ALU_R = 7'b0110011;
