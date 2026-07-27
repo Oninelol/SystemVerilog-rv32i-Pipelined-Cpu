@@ -5,7 +5,8 @@ module ALU(
     input [31:0] operand_1,
     input [31:0] operand_2,
     output logic zero,
-    output logic negative,
+    output logic lt_signed,
+    output logic lt_unsigned, 
     output [31:0] alu_result,
 );
 
@@ -46,7 +47,8 @@ module ALU(
         endcase
     end
 
-    assign zero = (alu_result == 32'd0) ? 32'd1 : 32'd0;  // logic to calculate the zero signal used for branching
-    assign negative = (alu_result < 32'd0) ? 32'd1 : 32'd0; // logic to calculate the negative signal used for branching
+    assign zero = (alu_result == 32'd0) ? 1'b1 : 1'b0;  // logic to calculate the zero signal used for branching
+    assign lt_signed = ($signed(operand_1) < $signed(operand_2)) ? 1'b1 : 1'b0; // logic to calculate the signed less than signal for branching
+    assign lt_unsigned = ((operand_1) < (operand_2)) ? 1'b1 : 1'b0; // logic to calculate the unsigned less than signal for branching
 
 endmodule
