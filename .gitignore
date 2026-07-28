@@ -1,0 +1,26 @@
+# Verilator files
+obj_dir/
+*_ALL.a
+
+# Simulation files
+*.vcd;
+*.fst;
+*.gtkw.bak
+*.log
+
+# RISC-V toolchain
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.dis
+*.dump
+
+# Editor/OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
