@@ -55,7 +55,7 @@ module tb_alu;
         end
     endtask
 
-    initial begin // start running tests
+    initial begin // test checks
         check_res(ALU_ADD, 32'd5,        32'd7,        32'd12,       "add basic"); // start checking for addition and subtraction
         check_res(ALU_ADD, 32'hFFFFFFFF, 32'd1,        32'd0,        "add wraparound");
         check_res(ALU_ADD, 32'h7FFFFFFF, 32'd1,        32'h80000000, "add signed overflow");

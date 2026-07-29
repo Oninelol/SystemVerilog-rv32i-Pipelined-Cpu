@@ -28,7 +28,7 @@ module immgen_tb;
     end
     endtask
 
-    initial begin
+    initial begin // test checks
         check_imm(32'h00500093, 32'h00000005, "I addi +5"); // I-type instructions
         check_imm(32'hFFF00093, 32'hFFFFFFFF, "I addi -1 (sign ext all 1s)");
         check_imm(32'h7FF00093, 32'h000007FF, "I addi +2047 (max)");
