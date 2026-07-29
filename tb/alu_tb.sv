@@ -56,7 +56,56 @@ module tb_alu;
     endtask
 
     initial begin // start running tests
-
+        check_res(ALU_ADD, 32'd5,        32'd7,        32'd12,       "add basic"); // start checking for addition and subtraction
+        check_res(ALU_ADD, 32'hFFFFFFFF, 32'd1,        32'd0,        "add wraparound");
+        check_res(ALU_ADD, 32'h7FFFFFFF, 32'd1,        32'h80000000, "add signed overflow");
+        check_res(ALU_SUB,32'd10,32'd3,32'd7,"sub basic");
+        check_res(ALU_SUB, 32'd3,        32'd10,       32'hFFFFFFF9, "sub negative result");
+        check_res(ALU_SUB, 32'h80000000, 32'd1,        32'h7FFFFFFF, "sub overflow wrap");
+        check_res(ALU_XOR, 32'hFF00FF00, 32'h0F0F0F0F, 32'hF00FF00F, "xor"); // bitwise operations
+        check_res(ALU_OR,  32'hFF00FF00, 32'h0F0F0F0F, 32'hFF0FFF0F, "or");
+        check_res(ALU_AND, 32'hFF00FF00, 32'h0F0F0F0F, 32'h0F000F00, "and");
+        check_res(ALU_SLL, 32'd1,        32'd31,       32'h80000000, "sll by 31"); // shifts 
+        check_res(ALU_SLL, 32'd1,        32'd32,       32'd1,        "sll amount masked to 5 bits");
+        check_res(ALU_SRL, 32'h80000000, 32'd31,       32'd1,        "srl by 31");
+        check_res(ALU_SRL, 32'hFFFFFFFF, 32'd4,        32'h0FFFFFFF, "srl fills zeros");
+        check_res(ALU_SRA, 32'h80000000, 32'd4,        32'hF8000000, "sra fills sign bits");
+        check_res(ALU_SRA, 32'h7FFFFFFF, 32'd4,        32'h07FFFFFF, "sra positive operand");
+        check_res(ALU_SLT,  32'hFFFFFFFF, 32'd1,        32'd1, "slt -1 < 1"); // set less than
+        check_res(ALU_SLT,  32'd1,        32'hFFFFFFFF, 32'd0, "slt 1 < -1 false");
+        check_res(ALU_SLT,  32'h80000000, 32'd1,        32'd1, "slt INT_MIN < 1");
+        check_res(ALU_SLTU, 32'd1,        32'hFFFFFFFF, 32'd1, "sltu 1 < max");
+        check_res(ALU_SLTU, 32'hFFFFFFFF, 32'd1,        32'd0, "sltu max < 1 false");
+        check_res(ALU_SLTU, 32'd5,        32'd5,        32'd0, "sltu equal false");
+        check_res(ALU_MUL,   32'd7,        32'd6,        32'd42,       "mul basic"); // multplication tests
+        check_res(ALU_MUL,   32'hFFFFFFFF, 32'hFFFFFFFF, 32'd1,        "mul -1*-1 low word");
+        check_res(ALU_MULH,  32'hFFFFFFFF, 32'hFFFFFFFF, 32'd0,        "mulh -1*-1 = 0 high");
+        check_res(ALU_MULH,  32'h80000000, 32'h80000000, 32'h40000000, "mulh INT_MIN^2 high");
+        check_res(ALU_MULU,  32'hFFFFFFFF, 32'hFFFFFFFF, 32'hFFFFFFFE, "mulhu max*max high");
+        check_res(ALU_MULSU, 32'hFFFFFFFF, 32'hFFFFFFFF, 32'hFFFFFFFF, "mulhsu -1 * max high");
+        check_res(ALU_DIV,  32'd42,       32'd7,        32'd6,        "div basic"); // division and remainder tests
+        check_res(ALU_DIV,  32'hFFFFFFF9, 32'd2,        32'hFFFFFFFD, "div -7/2 = -3 trunc");
+        check_res(ALU_DIVU, 32'hFFFFFFFF, 32'd2,        32'h7FFFFFFF, "divu max/2");
+        check_res(ALU_REM,  32'hFFFFFFF9, 32'd2,        32'hFFFFFFFF, "rem -7 mod 2 = -1");
+        check_res(ALU_REMU, 32'd7,        32'd3,        32'd1,        "remu basic");
+        check_res(ALU_DIV,  32'd5,        32'd0,        32'hFFFFFFFF, "div by zero -> -1 (spec)");
+        check_res(ALU_DIVU, 32'd5,        32'd0,        32'hFFFFFFFF, "divu by zero -> all 1s (spec)");
+        check_res(ALU_REM,  32'd5,        32'd0,        32'd5,        "rem by zero -> dividend (spec)");
+        check_res(ALU_DIV,  32'h80000000, 32'hFFFFFFFF, 32'h80000000, "div overflow INT_MIN/-1 (spec)");
+        check_flags(32'd5,        32'd5,        1,   0,   0, "equal"); // branch flags tests
+        check_flags(32'd3,        32'd7,        0,   1,   1, "both less");
+        check_flags(32'hFFFFFFFF, 32'd1,        0,   1,   0, "-1 vs 1 diverge");
+        check_flags(32'd1,        32'hFFFFFFFF, 0,   0,   1, "1 vs -1 diverge");
+        check_flags(32'h80000000, 32'd1,        0,   1,   0, "INT_MIN vs 1 (sub overflows)");
+        check_flags(32'h7FFFFFFF, 32'h80000000, 0,   0,   1, "INT_MAX vs INT_MIN");
+        // results displayed:
+        if(errors == 0) begin
+            $display("SUCESS: ALL %d TESTS PASSED",tests);
+        end
+        else begin
+            $display("FAILED: %d ERRORS IN %d TESTS",errors,tests);
+        end
+        $finish;
     end
 
 
