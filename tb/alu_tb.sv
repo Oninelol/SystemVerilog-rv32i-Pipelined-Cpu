@@ -32,7 +32,7 @@ module tb_alu;
         operand_2 = b;
         #1; // wait for alu combinational logic to run
         tests = tests + 1; // increment number of tests
-        if(alu_result != alu_expected) begin
+        if(alu_result !== alu_expected) begin
             errors = errors + 1; // increment error count
             $display("FAILED %s TEST, var1=%08h var2=%08h result=%08h expected=%08h",test_name,a,b,alu_result,alu_expected);
         end
@@ -48,7 +48,7 @@ module tb_alu;
         alu_op = ALU_SUB; // default ALU operation to subtraction for flag checking
         #1;
         tests = tests + 1;
-        if(zero != expected_zero || lt_signed != expected_lts || lt_unsigned != expected_ltu) begin
+        if(zero !== expected_zero || lt_signed !== expected_lts || lt_unsigned !== expected_ltu) begin
             errors = errors + 1;
             $display("FAILED %s FLAG TEST, var1=%08h var2=%08h zero=%b(expected %b) lt_signed=%b(expected %b) lt_unsigned=%b(expected %b)",
                         test_name,a,b,zero,expected_zero,lt_signed,expected_lts,lt_unsigned,expected_ltu);
