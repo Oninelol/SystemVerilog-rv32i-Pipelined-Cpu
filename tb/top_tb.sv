@@ -2,14 +2,12 @@
 module top_tb;
 
     logic clk,rst;
-    logic [31:0] pc_out;
-    logic [31:0] alu_res;
+    logic [31:0] pc_out;   
 
     top DUT( // Instantiate device under test (top module)
         .clk (clk),
         .rst (rst),
-        .pc_out (pc_out),
-        .alu_res(alu_res)
+        .pc_out (pc_out)
     );
 
     initial clk = 1;
@@ -40,7 +38,9 @@ module top_tb;
         pc_loop = 0;
         cycles = 0;
         while(pc_loop < 3 || cycles < 1000) begin
-            
+            if(prev_pc != pc_out) begin
+                
+            end
 
         end
 

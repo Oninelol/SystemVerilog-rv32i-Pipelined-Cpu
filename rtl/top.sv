@@ -1,8 +1,7 @@
 module top(
     input logic clk,
     input logic rst,
-    output logic [31:0] pc_out,
-    output logic [31:0] alu_res
+    output logic [31:0] pc_out
 );
 
     // wires below connects modules 
@@ -56,7 +55,6 @@ module top(
     end
 
     assign pc_out = read_addr_wire; // set output wire pc_out to read_addr_wire also to debug
-    assign alu_res = alu_result; // set output wire alu_res = alu_result for debugging purposes
 
     // below connects the modules
     program_counter cpu_pc (
