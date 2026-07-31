@@ -32,7 +32,7 @@ module ALU(
                 alu_result = temp_alu_mulh[63:32];
             end
             ALU_MULSU: begin // signed * unsigned directly does not directly work in systemverilog, 32'b0 preserves unsigned behavior.
-                temp_alu_mulsu = $signed({{32{operand_1[31]}},operand_1}) * $signed(32'b0,operand_2); 
+                temp_alu_mulsu = $signed({{32{operand_1[31]}},operand_1}) * $signed({32'b0,operand_2}); 
                 alu_result = temp_alu_mulsu[63:32];
             end 
             ALU_MULU: begin 
