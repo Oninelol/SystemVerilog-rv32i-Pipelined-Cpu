@@ -40,7 +40,7 @@ module top(
     end
 
     always_comb begin
-        if(jump & instr[6:0] = JALR) begin
+        if(jump & instr[6:0] == JALR) begin
             pc_in = (read_data_1 + imm_result) & ~32'd1; // JALR, clears bit 0
         end
         else if(jump) begin
