@@ -1,6 +1,6 @@
+module regfile
 import pkg::*;
-
-module register_file(
+(
     input clk,
     input rst,
     input logic reg_write,
@@ -27,8 +27,8 @@ module register_file(
     end
 
     always_comb begin   // combinational read
-        read_data1 <= regs[rs1];
-        read_data2 <= regs[rs2];
+        read_data1 = regs[rs1];
+        read_data2 = regs[rs2];
     end
 
 endmodule

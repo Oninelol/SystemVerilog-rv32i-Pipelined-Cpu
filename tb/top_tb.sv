@@ -77,10 +77,10 @@ module top_tb;
         check_reg(5'd22, 32'd0,        "beq shadow skipped");
         // Test results displayed:
         if(errors == 0) begin
-            $display("SUCCESS: ALL TESTS PASSED, HALTED AT %08h")
+            $display("SUCCESS: ALL TESTS PASSED, HALTED AT %08h",pc_out);
         end
         else begin
-            $display("FAILED: %d ERRORS FOUND")
+            $display("FAILED: %d ERRORS FOUND",errors);
         end
         $finish;
     end

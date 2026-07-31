@@ -1,6 +1,6 @@
+module instr_mem
 import pkg::*;
-
-module instruction_memory(
+(
     input [31:0] addr,
     output [31:0] instr
 );

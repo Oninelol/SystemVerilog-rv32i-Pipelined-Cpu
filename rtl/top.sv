@@ -1,18 +1,20 @@
-module top(
+module top
+import pkg::*;
+(
     input logic clk,
     input logic rst,
     output logic [31:0] pc_out
 );
 
     // wires below connects modules 
-    wire [31:0] instr;
-    wire [31:0] pc_in,read_addr_wire; 
-    wire [31:0] read_data_1,read_data_2;
-    wire [31:0] write_data;
-    wire [31:0] imm_result;
-    wire [4:0] alu_op;
-    wire [31:0] ALU_result;
-    wire [31:0] mem_read_data; 
+    logic [31:0] instr;
+    logic [31:0] pc_in,read_addr_wire; 
+    logic [31:0] read_data_1,read_data_2;
+    logic [31:0] write_data;
+    logic [31:0] imm_result;
+    logic [4:0] alu_op;
+    logic [31:0] ALU_result;
+    logic [31:0] mem_read_data; 
 
 
     // below are control signals from the control unit and ALU (for branching)
@@ -57,19 +59,19 @@ module top(
     assign pc_out = read_addr_wire; // set output wire pc_out to read_addr_wire also to debug
 
     // below connects the modules
-    program_counter cpu_pc (
+    pc cpu_pc (
         .pc_in (pc_in),
         .clk (clk),
         .rst (rst),
         .pc_out (read_addr_wire)
     );  // PC connections
 
-    instruction_memory cpu_imem (
+    instr_mem cpu_imem (
         .addr (read_addr_wire),
         .instr (instr)
     ); // Intructional memory connections
 
-    control_unit cpu_control (
+    control cpu_control (
         .instr (instr),
         .reg_write (RegWrite),
         .alu_type (ALUOp),
@@ -81,7 +83,7 @@ module top(
         .jump (jump)
     ); // Control unit connections
 
-    register_file cpu_regfile (
+    regfile cpu_regfile (
         .clk (clk),
         .rst (rst),
         .reg_write (RegWrite),
@@ -93,7 +95,7 @@ module top(
         .write_data (MemtoReg ? mem_read_data : ALU_result)
     ); // Regfile connections
 
-    imm_generator cpu_immgen (
+    imm_gen cpu_immgen (
         .instr (instr),
         .imm (imm_result)
     ); // immediate generator connections
@@ -104,7 +106,7 @@ module top(
         .alu_op (alu_op)
     ); // alu control connections
 
-    ALU cpu_alu (
+    alu cpu_alu (
         .alu_op (alu_op),
         .operand_1 (read_data_1),
         .operand_2 (ALUSrc ? imm_result : read_data_2),
@@ -114,12 +116,12 @@ module top(
         .alu_result (ALU_result)
     ); // Arithmetic logical unit connections
 
-    data_memory cpu_dmem (
+    data_mem cpu_dmem (
         .clk (clk),
         .rst (rst),
         .address (ALU_result),
         .mem_write_data (read_data_2),
-        .funct3 (instr[14:12]),
+        .funct_3 (instr[14:12]),
         .mem_read (MemRead),
         .mem_write (MemWrite),
         .mem_read_data (mem_read_data)

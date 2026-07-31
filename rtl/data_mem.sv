@@ -1,11 +1,11 @@
+module data_mem
 import pkg::*;
-
-module data_memory(
+(
     input logic clk,
     input logic rst,
     input logic [31:0] address,  // takes result of ALU
     input logic [31:0] mem_write_data, // write data input
-    input logic [2:0] funct3, // funct3 used to differentiate between different types of store/load
+    input logic [2:0] funct_3, // funct3 used to differentiate between different types of store/load
     input logic mem_read,
     input logic mem_write,
     output logic [31:0] mem_read_data
@@ -22,7 +22,7 @@ module data_memory(
                 end
             end
             else if(mem_write) begin // if memory write instructed
-                case(funct3)
+                case(funct_3)
                     3'b000: mem[address] <= mem_write_data[7:0];
                     3'b001: begin
                         mem[address] <= mem_write_data[7:0];
@@ -34,6 +34,7 @@ module data_memory(
                         mem[address+2] <= mem_write_data[23:16];
                         mem[address+3] <= mem_write_data[31:24];
                     end
+                    default: ;
                 endcase
             end
 
@@ -42,12 +43,13 @@ module data_memory(
     always_comb begin // combinational memory read
         mem_read_data = 32'd0; // default case where nothing is loaded (read data = 0);
         if(mem_read) begin
-            case(funct3)
+            case(funct_3)
                 3'b000: mem_read_data = {{24{mem[address][7]}},mem[address]};
                 3'b001: mem_read_data = {{16{mem[address+1][7]}},mem[address+1],mem[address]};
                 3'b010: mem_read_data = {mem[address+3],mem[address+2],mem[address+1],mem[address]};
                 3'b100: mem_read_data = {{24{1'b0}},mem[address]};
                 3'b101: mem_read_data = {{16{1'b0}},mem[address+1],mem[address]};
+                default: ;
             endcase
         end
     end

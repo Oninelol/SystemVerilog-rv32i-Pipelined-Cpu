@@ -1,6 +1,6 @@
+module pc
 import pkg::*;
-
-module program_counter(
+(
     input [31:0] pc_in,
     input logic clk,
     input logic rst,

@@ -1,6 +1,6 @@
+module control
 import pkg::*;
-
-module control_unit(
+(
     input logic [31:0] instr,
     output logic reg_write,
     output logic [1:0] alu_type,
