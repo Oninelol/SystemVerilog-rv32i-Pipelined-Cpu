@@ -93,7 +93,7 @@ import pkg::*;
         .rs2 (instr[24:20]),
         .read_data2 (read_data_2),
         .rd (instr[11:7]),
-        .write_data (MemtoReg ? mem_read_data : ALU_result)
+        .write_data (jump ? pc_plus_4 : (MemtoReg ? mem_read_data : ALU_result))
     ); // Regfile connections
 
     imm_gen cpu_immgen (

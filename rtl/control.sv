@@ -62,8 +62,10 @@ import pkg::*;
             reg_write = 1;
             alu_src = 1;
         end 
-        AUIPC: reg_write = 1;
-
+        AUIPC: begin
+            reg_write = 1;
+            alu_src = 1;
+        end
         endcase
     end
 

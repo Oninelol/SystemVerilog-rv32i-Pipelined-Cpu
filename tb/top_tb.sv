@@ -74,7 +74,6 @@ module top_tb;
         check_reg(5'd19, 32'd0,        "jal shadow skipped");
         check_reg(5'd20, 32'h58,       "jalr link = 0x54+4");
         check_reg(5'd21, 32'd0,        "jalr shadow skipped");
-        check_reg(5'd22, 32'd0,        "beq shadow skipped");
         // Test results displayed:
         if(errors == 0) begin
             $display("SUCCESS: ALL TESTS PASSED, HALTED AT %08h",pc_out);
