@@ -6,10 +6,11 @@ import pkg::*;
     output logic [31:0] pc_out
 );
 
-    // wires below connects modules 
+    // logic to connect modules 
     logic [31:0] instr;
     logic [31:0] pc_in,read_addr_wire; 
     logic [31:0] read_data_1,read_data_2;
+    logic [31:0] alu_operand_1;
     logic [31:0] write_data;
     logic [31:0] imm_result;
     logic [4:0] alu_op;
@@ -106,9 +107,11 @@ import pkg::*;
         .alu_op (alu_op)
     ); // alu control connections
 
+    assign alu_operand_1 = (instr[6:0] == AUIPC) ? read_addr_wire : ((instr[6:0] == LUI) ? 32'd0 : read_data_1);     // handle cases for LUI/AUIPC instructions
+
     alu cpu_alu (
         .alu_op (alu_op),
-        .operand_1 (read_data_1),
+        .operand_1 (alu_operand_1),
         .operand_2 (ALUSrc ? imm_result : read_data_2),
         .zero (zero),
         .lt_signed (lt_signed),
