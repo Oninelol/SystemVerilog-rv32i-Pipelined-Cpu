@@ -1,15 +1,15 @@
 module regfile
 import pkg::*;
 (
-    input clk,
-    input rst,
+    input logic clk,
+    input logic rst,
     input logic reg_write,
-    input [4:0] rs1,
-    output [31:0] read_data1,
-    input [4:0] rs2,
-    output [31:0] read_data2,
-    input [4:0] rd,
-    input [31:0] write_data
+    input logic [4:0] rs1,
+    output logic [31:0] read_data1,
+    input logic [4:0] rs2,
+    output logic [31:0] read_data2,
+    input logic [4:0] rd,
+    input logic [31:0] write_data
 );
 
     logic [31:0] regs [31:0]; // 32 Registers that are each 32 bit wide in regfile
@@ -21,7 +21,7 @@ import pkg::*;
                 regs[i] <= 32'd0;
             end
         end
-        else if(reg_write) begin
+        else if(reg_write && rd != 5'd0) begin
             regs[rd] <= write_data; // write data into desired register
         end
     end
