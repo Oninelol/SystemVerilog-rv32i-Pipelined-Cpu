@@ -53,7 +53,7 @@ module alu_control_tb;
     tests = tests + 1;
     if(alu_op !== expected_alu_op) begin
         errors = errors + 1;
-        $display("FAILED %s TEST, ");
+        $display("FAILED %s TEST, OPERATION: %s EXPECTED: %s",name,op_name(alu_op),op_name(expected_alu_op));
     end
     endtask
 
