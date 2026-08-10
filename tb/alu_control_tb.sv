@@ -18,7 +18,9 @@ module alu_control_tb;
     integer errors = 0;
     integer tests = 0;
 
-    function string op_name(input [4:0] op_) // helper function to display result and expected operations with names
+    function string op_name( // helper function to display result and expected operations with names
+        input [4:0] op_
+    ); 
         case(op_)
             ALU_ADD: return "ADD";
             ALU_SUB: return "SUB";
