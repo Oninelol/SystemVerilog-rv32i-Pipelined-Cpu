@@ -10,7 +10,7 @@ import pkg::*;
     logic [31:0] instr;
     logic [31:0] pc_in,read_addr_wire; 
     logic [31:0] read_data_1,read_data_2;
-    logic [31:0] alu_operand_1;
+    logic [31:0] alu_operand_1,alu_operand_2;
     logic [31:0] write_data;
     logic [31:0] imm_result;
     logic [4:0] alu_op;
@@ -61,13 +61,17 @@ import pkg::*;
     logic memwb_reg_write_out;
     logic memwb_mem_to_reg_out;
     logic memwb_jump_out;
+    logic [1:0] forward_A, forward_B;
+    logic [31:0] exmem_fwd_val;
+    logic [31:0] wb_data;
+    logic [31:0] fwd_A, fwd_B;
 
     // pc logic below
     logic branch_taken; // logic signal indicating if a branch is taken 
     wire [31:0] pc_plus_4, pc_target;
     assign pc_plus_4 = read_addr_wire + 32'd4; // default pc incrementation logic
 
-    always_comb begin
+    always_comb begin // branch_taken indicating logic
         case(instr[14:12])
             3'b000: branch_taken = zero; // branch equal
             3'b001: branch_taken = ~zero; // branch not equal
@@ -79,7 +83,7 @@ import pkg::*;
         endcase
     end
 
-    always_comb begin
+    always_comb begin // next PC logic 
         if(jump & instr[6:0] == JALR) begin
             pc_in = (read_data_1 + imm_result) & ~32'd1; // JALR, clears bit 0
         end
@@ -119,6 +123,19 @@ import pkg::*;
         .pc_out (if_id_pc_out),
         .instr_out (if_id_instr_out)
     ); // pipeline stage register fetch->decode connections
+
+    hazard_unit cpu_hazard_unit (
+        .id_ex_rd (id_ex_instr_out[11:7]),
+        .if_id_rs (if_id_instr_out[19:15]),
+        .if_id_rt (if_id_instr_out[24:20]),
+        .id_ex_memread (idex_mem_read_out),
+        .branch_taken (idex_branch_enable_out && branch_taken),
+        .jump (idex_jump_out),
+        .pc_stall (pc_stall),
+        .if_id_stall (if_id_stall),
+        .if_id_flush (if_id_flush),
+        .id_ex_flush (id_ex_flush)
+    ); // Hazard unit connections
 
     control cpu_control (
         .instr (if_id_instr_out),
@@ -187,14 +204,42 @@ import pkg::*;
         .alu_op (alu_op)
     ); // alu control connections
 
-    // next-pc logic should be here
+    forwarding_unit cpu_forwarding_unit (
+        .rs (idex_instr_out[19:15]),
+        .rt (idex_instr_out[24:20]),
+        .ex_mem_rd (exmem_rd_out),
+        .mem_wb_rd (memwb_rd_out),
+        .ex_mem_regwrite (exmem_reg_write_out),
+        .mem_wb_regwrite (memwb_reg_write_out),
+        .forward_A (forward_A),
+        .forward_B (forward_B)
+    ); // forwarding unit connections
 
-    assign alu_operand_1 = (id_ex_instr_out[6:0] == AUIPC) ? read_addr_wire : ((id_ex_instr_out[6:0] == LUI) ? 32'd0 : read_data_1); // handle cases for LUI/AUIPC instructions
+    assign exmem_fwd_val = exmem_jump_out ? exmem_pc_result_out : exmem_alu_result_out; // forwarding value at ex->mem reg
+
+    always_comb begin  // forwarding data for operand A
+        case(forward_A) 
+            2'b01: exmem_fwd_val;
+            2'b10: wb_data;
+            default: idex_read_data1_out;
+        endcase
+    end
+
+    always_comb begin // forwarding data for operand B
+        case(forward_B) 
+            2'b01: exmem_fwd_val;
+            2'b10: wb_data;
+            default: idex_read_data2_out;
+        endcase
+    end
+
+    assign alu_operand_1 = (id_ex_instr_out[6:0] == AUIPC) ? id_ex_pc_out : ((id_ex_instr_out[6:0] == LUI) ? 32'd0 : fwd_A); // handle cases for LUI/AUIPC instructions
+    assign alu_operand_2 = idex_alu_src_out ? idex_imm_out : fwd_B; // decide between different operand inputs
 
     alu cpu_alu (
         .alu_op (alu_op),
         .operand_1 (alu_operand_1),
-        .operand_2 (idex_alu_src_out ? idex_imm_out : idex_read_data2_out),
+        .operand_2 (alu_operand_2),
         .zero (zero),
         .lt_signed (lt_signed),
         .lt_unsigned(lt_unsigned),
@@ -250,15 +295,15 @@ import pkg::*;
         .mem_to_reg_in (exmem_mem_to_reg_out),
         .jump_in (exmem_jump_out),
         .read_data_out (memwb_read_data_out),
-        .addr_out (memwb_addr_out),
+        .addr_out (memwb_alu_result_out),
         .pc_result_out (memwb_pc_result_out),
         .rd_out (memwb_rd_out),
         .reg_write_out (memwb_reg_write_out),
         .mem_to_reg_out (memwb_mem_to_reg_out),
         .jump_out (memwb_jump_out)
-    );
+    ); // pipeline stage register memory->writeback connections
 
-
+    assign wb_data = memwb_jump_out ? memwb_pc_result_out : (memwb_mem_to_reg_out ? memwb_read_data_out : memwb_alu_result_out); // writeback data
 
 endmodule
 
