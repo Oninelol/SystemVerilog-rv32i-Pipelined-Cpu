@@ -36,13 +36,13 @@ import pkg::*;
     logic [31:0] idex_imm_out;
     logic [31:0] id_ex_instr_out;
     logic idex_reg_write_out;
-    logic [1:0] idex_ALUOp_out,
-    logic idex_mem_read_out,
-    logic idex_mem_write_out,
-    logic idex_branch_enable_out,
-    logic idex_alu_src_out,
-    logic idex_mem_to_reg_out, 
-    logic idex_jump_out
+    logic [1:0] idex_ALUOp_out;
+    logic idex_mem_read_out;
+    logic idex_mem_write_out;
+    logic idex_branch_enable_out;
+    logic idex_alu_src_out;
+    logic idex_mem_to_reg_out;
+    logic idex_jump_out;
     logic [31:0] pc_jal_link;
     logic [31:0] exmem_pc_result_out;
     logic [31:0] exmem_alu_result_out;
@@ -68,7 +68,7 @@ import pkg::*;
 
     // pc logic below
     logic branch_taken; // logic signal indicating if a branch is taken 
-    wire [31:0] pc_plus_4, pc_target;
+    logic [31:0] pc_plus_4, pc_target;
     assign pc_plus_4 = read_addr_wire + 32'd4; // default pc incrementation logic
 
     always_comb begin // branch_taken indicating logic
@@ -84,14 +84,14 @@ import pkg::*;
     end
 
     always_comb begin // next PC logic 
-        if(jump & instr[6:0] == JALR) begin
-            pc_in = (read_data_1 + imm_result) & ~32'd1; // JALR, clears bit 0
+        if(idex_jump_out & id_ex_instr_out[6:0] == JALR) begin
+            pc_in = (fwd_A + idex_imm_out) & ~32'd1; // JALR, clears bit 0
         end
-        else if(jump) begin
-            pc_in = read_addr_wire + imm_result; // JAL = pc + imm;
+        else if(idex_jump_out) begin
+            pc_in = id_ex_pc_out + idex_imm_out; // JAL = pc + imm;
         end
-        else if(BranchEnable && branch_taken) begin 
-            pc_in = read_addr_wire + imm_result; // Branching, pc += imm;
+        else if(idex_branch_enable_out && branch_taken) begin 
+            pc_in = id_ex_pc_out + idex_imm_out; // Branching, pc += imm;
         end
         else begin // regular case of incrementing by 4
             pc_in = pc_plus_4;
@@ -105,6 +105,7 @@ import pkg::*;
         .pc_in (pc_in),
         .clk (clk),
         .rst (rst),
+        .stall (pc_stall),
         .pc_out (read_addr_wire)
     );  // PC connections
 
@@ -118,7 +119,7 @@ import pkg::*;
         .rst (rst),
         .stall (if_id_stall),
         .flush (if_id_flush),
-        .pc_in (pc_plus_4),
+        .pc_in (read_addr_wire),
         .instr_in (instr),
         .pc_out (if_id_pc_out),
         .instr_out (if_id_instr_out)
@@ -158,7 +159,7 @@ import pkg::*;
         .rs2 (if_id_instr_out[24:20]),
         .read_data2 (read_data_2),
         .rd (if_id_instr_out[11:7]),
-        .write_data (jump ? pc_plus_4 : (MemtoReg ? mem_read_data : ALU_result))
+        .write_data (jump ? pc_plus_4 : (MemtoReg ? wb_data : ALU_result))
     ); // Regfile connections
 
     imm_gen cpu_immgen (
@@ -205,8 +206,8 @@ import pkg::*;
     ); // alu control connections
 
     forwarding_unit cpu_forwarding_unit (
-        .rs (idex_instr_out[19:15]),
-        .rt (idex_instr_out[24:20]),
+        .rs (id_ex_instr_out[19:15]),
+        .rt (id_ex_instr_out[24:20]),
         .ex_mem_rd (exmem_rd_out),
         .mem_wb_rd (memwb_rd_out),
         .ex_mem_regwrite (exmem_reg_write_out),
@@ -219,17 +220,17 @@ import pkg::*;
 
     always_comb begin  // forwarding data for operand A
         case(forward_A) 
-            2'b01: exmem_fwd_val;
-            2'b10: wb_data;
-            default: idex_read_data1_out;
+            2'b01: fwd_A = exmem_fwd_val;
+            2'b10: fwd_A = wb_data;
+            default: fwd_A = idex_read_data1_out;
         endcase
     end
 
     always_comb begin // forwarding data for operand B
         case(forward_B) 
-            2'b01: exmem_fwd_val;
-            2'b10: wb_data;
-            default: idex_read_data2_out;
+            2'b01: fwd_B = exmem_fwd_val;
+            2'b10: fwd_B = wb_data;
+            default: fwd_B = idex_read_data2_out;
         endcase
     end
 
@@ -252,7 +253,8 @@ import pkg::*;
         .clk (clk),
         .rst (rst),
         .pc_result_in (pc_jal_link),
-        .write_data_in (ALU_result),
+        .alu_result_in (ALU_result),
+        .write_data_in (fwd_B),
         .rd_in (id_ex_instr_out[11:7]),
         .funct3_in (id_ex_instr_out[14:12]),
         .reg_write_in (idex_reg_write_out),
@@ -276,12 +278,12 @@ import pkg::*;
     data_mem cpu_dmem (
         .clk (clk),
         .rst (rst),
-        .address (ALU_result),
-        .mem_write_data (read_data_2),
-        .funct_3 (instr[14:12]),
-        .mem_read (MemRead),
-        .mem_write (MemWrite),
-        .mem_read_data (mem_read_data)
+        .address (alu_result_out),
+        .mem_write_data (idex_read_data2_out),
+        .funct_3 (id_ex_instr_out[14:12]),
+        .mem_read (exmem_mem_read_out),
+        .mem_write (exmem_mem_write_out),
+        .mem_read_data (exmem_mem_read_out)
     ); // Data memory connections
 
     mem_wb_reg cpu_mem_wb_reg (
