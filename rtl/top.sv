@@ -72,7 +72,7 @@ import pkg::*;
     assign pc_plus_4 = read_addr_wire + 32'd4; // default pc incrementation logic
 
     always_comb begin // branch_taken indicating logic
-        case(instr[14:12])
+        case(id_ex_instr_out[14:12])
             3'b000: branch_taken = zero; // branch equal
             3'b001: branch_taken = ~zero; // branch not equal
             3'b100: branch_taken = lt_signed; // branch less than (signed)
@@ -153,13 +153,13 @@ import pkg::*;
     regfile cpu_regfile (
         .clk (clk),
         .rst (rst),
-        .reg_write (RegWrite),
+        .reg_write (memwb_reg_write_out),
         .rs1 (if_id_instr_out[19:15]),
         .read_data1 (read_data_1),
         .rs2 (if_id_instr_out[24:20]),
         .read_data2 (read_data_2),
-        .rd (if_id_instr_out[11:7]),
-        .write_data (jump ? pc_plus_4 : (MemtoReg ? wb_data : ALU_result))
+        .rd (memwb_rd_out),
+        .write_data (wb_data)
     ); // Regfile connections
 
     imm_gen cpu_immgen (
@@ -278,12 +278,12 @@ import pkg::*;
     data_mem cpu_dmem (
         .clk (clk),
         .rst (rst),
-        .address (alu_result_out),
-        .mem_write_data (idex_read_data2_out),
-        .funct_3 (id_ex_instr_out[14:12]),
+        .address (exmem_alu_result_out),
+        .mem_write_data (exmem_write_data_out),
+        .funct_3 (exmem_funct3_out),
         .mem_read (exmem_mem_read_out),
         .mem_write (exmem_mem_write_out),
-        .mem_read_data (exmem_mem_read_out)
+        .mem_read_data (mem_read_data)
     ); // Data memory connections
 
     mem_wb_reg cpu_mem_wb_reg (
@@ -297,7 +297,7 @@ import pkg::*;
         .mem_to_reg_in (exmem_mem_to_reg_out),
         .jump_in (exmem_jump_out),
         .read_data_out (memwb_read_data_out),
-        .addr_out (memwb_alu_result_out),
+        .addr_out (memwb_addr_out),
         .pc_result_out (memwb_pc_result_out),
         .rd_out (memwb_rd_out),
         .reg_write_out (memwb_reg_write_out),

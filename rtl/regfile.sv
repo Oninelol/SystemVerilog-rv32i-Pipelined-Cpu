@@ -12,9 +12,9 @@ import pkg::*;
     input logic [31:0] write_data
 );
 
-    logic [31:0] regs [31:0]; // 32 Registers that are each 32 bit wide in regfile
+    logic [31:0] regs [31:0]; 
 
-    always_ff @(posedge clk) begin // clocked regfile
+    always_ff @(posedge clk) begin 
         if(rst) begin
             integer i;
             for(i=0;i<32;i=i+1) begin
@@ -22,13 +22,23 @@ import pkg::*;
             end
         end
         else if(reg_write && rd != 5'd0) begin
-            regs[rd] <= write_data; // write data into desired register
+            regs[rd] <= write_data; 
         end
     end
 
-    always_comb begin   // combinational read
-        read_data1 = regs[rs1];
-        read_data2 = regs[rs2];
+    always_comb begin 
+        if(reg_write && rd == rs1 && rd != 5'd0) begin
+            read_data1 = write_data;
+        end
+        else begin
+            read_data1 = regs[rs1];
+        end
+        if(reg_write && rd == rs2 && rd != 5'd0) begin
+            read_data2 = write_data;
+        end
+        else begin
+            read_data2 = regs[rs2];
+        end
     end
 
 endmodule
