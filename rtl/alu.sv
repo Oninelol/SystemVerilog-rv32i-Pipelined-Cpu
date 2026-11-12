@@ -15,6 +15,9 @@ import pkg::*;
     logic [63:0] temp_alu_mulu; // create logic vector variables to take temporary calculations that required higher bits to be copied
 
     always_comb begin // case statement inside to derive alu operation based on alu operation decided in alu_control block
+        temp_alu_mulh = 0; 
+        temp_alu_mulsu = 0; 
+        temp_alu_mulu = 0;
         case(alu_op)
             ALU_ADD: alu_result = operand_1 + operand_2;
             ALU_SUB: alu_result = operand_1 - operand_2;
@@ -39,10 +42,30 @@ import pkg::*;
                 temp_alu_mulu = {32'b0,operand_1} * {32'b0,operand_2};
                 alu_result = temp_alu_mulu[63:32];
             end
-            ALU_DIV: alu_result = ($signed(operand_1) / $signed(operand_2)); // add checks for DIV operation if operand_2 is 0 later (fix)
-            ALU_DIVU: alu_result = operand_1 / operand_2;
-            ALU_REM: alu_result = ($signed(operand_1) % $signed(operand_2));
-            ALU_REMU: alu_result = operand_1 % operand_2;
+            ALU_DIV: begin
+                if(operand_2 == 32'd0) begin
+                    alu_result = 32'hFFFFFFFF;
+                end
+                else if(operand_1 == 32'h80000000 && operand_2 == 32'hFFFFFFFF) begin
+                    alu_result = 32'h80000000;
+                end
+                else begin
+                    alu_result = ($signed(operand_1) / $signed(operand_2));
+                end
+            end
+            ALU_DIVU: alu_result = (operand_2 == 32'd0) ? 32'hFFFFFFFF : (operand_1 / operand_2);
+            ALU_REM: begin
+                if(operand_2 == 32'd0) begin
+                    alu_result = operand_1;
+                end
+                else if(operand_1 == 32'h80000000 && operand_2 == 32'hFFFFFFFF) begin
+                    alu_result = 32'd0;
+                end
+                else begin
+                    alu_result = ($signed(operand_1) % $signed(operand_2));
+                end
+            end
+            ALU_REMU: alu_result = (operand_2 == 32'd0) ? operand_1 : (operand_1 % operand_2);
             default: alu_result = 32'd0;
         endcase
     end

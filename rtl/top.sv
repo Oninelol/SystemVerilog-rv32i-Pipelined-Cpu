@@ -305,7 +305,7 @@ import pkg::*;
         .jump_out (memwb_jump_out)
     ); // pipeline stage register memory->writeback connections
 
-    assign wb_data = memwb_jump_out ? memwb_pc_result_out : (memwb_mem_to_reg_out ? memwb_read_data_out : memwb_alu_result_out); // writeback data
+    assign wb_data = memwb_jump_out ? memwb_pc_result_out : (memwb_mem_to_reg_out ? memwb_read_data_out : memwb_addr_out); // writeback data
 
 endmodule
 
